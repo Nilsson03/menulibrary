@@ -8,6 +8,7 @@ import ru.nilsson03.library.bukkit.util.log.ConsoleLogger;
 import ru.nilsson03.library.menu.Menu;
 import ru.nilsson03.library.menu.Slot;
 import ru.nilsson03.library.menu.item.Item;
+import ru.nilsson03.library.menu.item.impl.CustomItem;
 import ru.nilsson03.library.menu.item.impl.control.ControlItem;
 import ru.nilsson03.library.menu.item.impl.control.PageItem;
 
@@ -160,6 +161,11 @@ public class PagedMenu implements Menu {
     @Override
     public void close(Player player) {
         player.closeInventory();
+    }
+
+    @Override
+    public boolean isCustomItem(Item item) {
+        return item instanceof CustomItem;
     }
 
     public void handleClick(InventoryClickEvent event, int currentPage) {
