@@ -3,6 +3,7 @@ package ru.nilsson03.library.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import ru.nilsson03.library.bukkit.util.log.ConsoleLogger;
+import ru.nilsson03.library.menu.item.Item;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public interface Menu {
     Inventory getInventory();
     void open(Player player);
     void close(Player player);
+    boolean isCustomItem(Item item);
 
     default char getSymbolBySlot(int slot) {
         int row = slot / 9;
