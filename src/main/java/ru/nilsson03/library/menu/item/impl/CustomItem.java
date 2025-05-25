@@ -16,13 +16,10 @@ import ru.nilsson03.library.menu.item.util.ItemUtil;
 import ru.nilsson03.library.bukkit.item.builder.ItemBuilder;
 import ru.nilsson03.library.bukkit.item.builder.impl.SpigotItemBuilder;
 
-import java.util.List;
-
 public class CustomItem extends Item implements Updatable {
     private final ConfigurationSection config;
     private final Plugin plugin;
     private ItemStack currentItem;
-    private int currentFrame = 0;
     private final int updateInterval;
 
     public CustomItem(NPlugin plugin, ConfigurationSection config) {
@@ -48,16 +45,13 @@ public class CustomItem extends Item implements Updatable {
         if (inventoryClickEvent.getWhoClicked() instanceof Player player) {
             config.getStringList("click-commands").forEach(cmd ->
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                            cmd.replace("%player%", player.getName()))
+                            cmd.replace("{player}", player.getName()))
             );
         }
     }
 
     @Override
     public void update() {
-        if (config.contains("animated-name")) {
-            currentFrame = (currentFrame + 1) % config.getStringList("animated-name").size();
-        }
         this.currentItem = buildItem();
     }
 
@@ -73,12 +67,7 @@ public class CustomItem extends Item implements Updatable {
         ItemBuilder builder = new SpigotItemBuilder(item)
                 .setMeta(meta);
 
-        if (config.contains("animated-name")) {
-            List<String> frames = config.getStringList("animated-name");
-            builder.setDisplayName(frames.get(currentFrame));
-        } else {
-            builder.setDisplayName(config.getString("name"));
-        }
+        builder.setDisplayName(config.getString("name"));
 
         if (config.contains("lore")) {
             builder.setLore(config.getStringList("lore"));
