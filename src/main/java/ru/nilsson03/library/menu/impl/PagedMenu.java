@@ -83,7 +83,7 @@ public class PagedMenu implements Menu {
                 if (itemIndex < newItems.size()) {
                     inv.setItem(slot, newItems.get(itemIndex++).getItemStack());
                 } else {
-                    inv.setItem(slot, null); // Очищаем лишние слоты
+                    inv.setItem(slot, null);
                 }
             }
         }
