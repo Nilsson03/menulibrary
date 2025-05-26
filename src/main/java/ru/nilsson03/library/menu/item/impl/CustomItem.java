@@ -15,12 +15,24 @@ import ru.nilsson03.library.menu.item.Updatable;
 import ru.nilsson03.library.menu.item.util.ItemUtil;
 import ru.nilsson03.library.bukkit.item.builder.ItemBuilder;
 import ru.nilsson03.library.bukkit.item.builder.impl.SpigotItemBuilder;
+import ru.nilsson03.library.text.api.TextApi;
+import ru.nilsson03.library.text.api.TextApiFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class CustomItem extends Item implements Updatable {
+
+    private static final TextApi textApi = TextApiFactory.create();
+
     private final ConfigurationSection config;
     private final Plugin plugin;
     private ItemStack currentItem;
     private final int updateInterval;
+    private final Map<String, Supplier<String>> replaceSuppliers = new HashMap<>();
 
     public CustomItem(NPlugin plugin, ConfigurationSection config) {
         this.plugin = plugin;
@@ -33,6 +45,10 @@ public class CustomItem extends Item implements Updatable {
             MenuProvider.get(plugin).ifPresent(provider ->
                     provider.addNewUpdatableItem(this));
         }
+    }
+
+    public void addReplacement(String placeholder, Supplier<String> replacementSupplier) {
+        replaceSuppliers.put(placeholder, replacementSupplier);
     }
 
     @Override
@@ -67,10 +83,13 @@ public class CustomItem extends Item implements Updatable {
         ItemBuilder builder = new SpigotItemBuilder(item)
                 .setMeta(meta);
 
-        builder.setDisplayName(config.getString("name"));
+        builder.setDisplayName(applyReplacements(config.getString("name")));
 
         if (config.contains("lore")) {
-            builder.setLore(config.getStringList("lore"));
+            List<String> lore = config.getStringList("lore").stream()
+                    .map(this::applyReplacements)
+                    .collect(Collectors.toList());
+            builder.setLore(lore);
         }
 
         return builder.build();
@@ -86,6 +105,25 @@ public class CustomItem extends Item implements Updatable {
     private ItemStack createHeadItem(String texture) {
         return ItemUtil.createHead(texture)
                 .build();
+    }
+
+    private String applyReplacements(String text) {
+        return applyReplacements(text, null);
+    }
+
+    private String applyReplacements(String text, Player player) {
+        if (text == null) return null;
+
+        String result = text;
+        for (Map.Entry<String, Supplier<String>> entry : replaceSuppliers.entrySet()) {
+            result = result.replace(entry.getKey(), entry.getValue().get());
+        }
+
+        if (player != null) {
+            result = result.replace("{player}", player.getName());
+        }
+
+        return result;
     }
 
     public Plugin getPlugin() {
